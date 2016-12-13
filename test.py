@@ -26,7 +26,7 @@ json_objects = st.recursive(
 def test_write_obj(obj):
     out = io.StringIO()
     f = jsonfile.JsonWriter(out)
-    f.write_obj(obj)
+    f._write_obj(obj)
 
     remade = json.loads(out.getvalue())
     assert remade == obj
@@ -35,7 +35,7 @@ def test_write_obj(obj):
 def test_write_nan():
     out = io.StringIO()
     f = jsonfile.JsonWriter(out)
-    f.write_obj(float('nan'))
+    f._write_obj(float('nan'))
 
     remade = json.loads(out.getvalue())
     assert math.isnan(remade)

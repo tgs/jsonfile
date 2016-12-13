@@ -13,7 +13,7 @@ class JsonWriter:
     def __init__(self, out):
         self.out = out
 
-    def write_obj(self, obj):
+    def _write_obj(self, obj):
         json.dump(obj, self.out)
 
     def list(self):
