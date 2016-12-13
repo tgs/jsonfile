@@ -11,13 +11,14 @@ import jsonfile
 # See http://hypothesis.readthedocs.io/en/latest/data.html#recursive-data
 json_objects = st.recursive(
     st.one_of(
-        st.text(),
+        st.text(max_size=30),
         st.floats().filter(lambda f: not math.isnan(f)),
         st.booleans(),
         st.none()),
     lambda children: st.one_of(
-        st.lists(children),
-        st.dictionaries(st.text(), children)))
+        st.lists(children, max_size=30),
+        st.dictionaries(st.text(), children, max_size=30)),
+    max_leaves=15)
 # NaN: serializing and deserializing work fine, but it's a pain to compare
 # containers for equality when they contain NaN.
 
