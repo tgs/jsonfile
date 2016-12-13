@@ -21,23 +21,20 @@ class JsonWriter:
         self.out = out
         self.context = [None]
 
-    def _write_obj(self, obj):
-        json.dump(obj, self.out)
-
     def write_pending_separator(self):
         if self.top_state == State.List:
             self.out.write(',')
         elif self.top_state == State.ListStart:
             self.context[-1] = State.List
 
-    def write_list_start(self):
+    def start_list(self):
         self.write_pending_separator()
         self.out.write('[')
         self.context.append(State.ListStart)
 
-    def write_list_item(self, item):
+    def write_obj(self, item):
         self.write_pending_separator()
-        self._write_obj(item)
+        json.dump(item, self.out)
 
     def write_list_end(self):
         last_state = self.context.pop()
