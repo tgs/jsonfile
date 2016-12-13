@@ -27,7 +27,7 @@ json_objects = st.recursive(
 def test_write_obj(obj):
     out = io.StringIO()
     f = jsonfile.JsonWriter(out)
-    f.write_obj(obj)
+    f.list_item(obj)
 
     remade = json.loads(out.getvalue())
     assert remade == obj
@@ -36,7 +36,7 @@ def test_write_obj(obj):
 def test_write_nan():
     out = io.StringIO()
     f = jsonfile.JsonWriter(out)
-    f.write_obj(float('nan'))
+    f.list_item(float('nan'))
 
     remade = json.loads(out.getvalue())
     assert math.isnan(remade)
@@ -49,9 +49,9 @@ def test_list_raw(objects):
     f.start_list()
 
     for item in objects:
-        f.write_obj(item)
+        f.list_item(item)
 
-    f.write_list_end()
+    f.end_list()
 
     remade = json.loads(out.getvalue())
     assert remade == objects
@@ -67,12 +67,12 @@ def test_nested_list(objects):
         if isinstance(item, list):
             f.start_list()
             for item2 in item:
-                f.write_obj(item2)
-            f.write_list_end()
+                f.list_item(item2)
+            f.end_list()
         else:
-            f.write_obj(item)
+            f.list_item(item)
 
-    f.write_list_end()
+    f.end_list()
 
     serialized = out.getvalue()
     note(serialized)

@@ -32,11 +32,11 @@ class JsonWriter:
         self.out.write('[')
         self.context.append(State.ListStart)
 
-    def write_obj(self, item):
+    def list_item(self, item):
         self.write_pending_separator()
         json.dump(item, self.out)
 
-    def write_list_end(self):
+    def end_list(self):
         last_state = self.context.pop()
         assert last_state in (State.List, State.ListStart)
         self.out.write(']')
