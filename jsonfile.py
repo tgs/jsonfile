@@ -16,9 +16,6 @@ class JsonWriter:
     def _write_obj(self, obj):
         json.dump(obj, self.out)
 
-    def list(self):
-        return JsonList(self.out)
-
 
 class JsonList:
     def __init__(self, out):

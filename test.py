@@ -44,9 +44,7 @@ def test_write_nan():
 @given(st.lists(json_objects))
 def test_list(objects):
     out = io.StringIO()
-    f = jsonfile.JsonWriter(out)
-
-    with f.list() as lst:
+    with jsonfile.JsonList(out) as lst:
         for item in objects:
             lst.write_item(item)
 
