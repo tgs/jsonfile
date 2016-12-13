@@ -39,3 +39,16 @@ def test_write_nan():
 
     remade = json.loads(out.getvalue())
     assert math.isnan(remade)
+
+
+@given(st.lists(json_objects))
+def test_list(objects):
+    out = io.StringIO()
+    f = jsonfile.JsonWriter(out)
+
+    with f.list() as lst:
+        for item in objects:
+            lst.write_item(item)
+
+    remade = json.loads(out.getvalue())
+    assert remade == objects
