@@ -78,3 +78,20 @@ def test_nested_list(objects):
     note(serialized)
     remade = json.loads(serialized)
     assert remade == objects
+
+
+@given(st.dictionaries(st.text(max_size=5), json_objects, max_size=5))
+def test_dict_raw(objects):
+    out = io.StringIO()
+    f = jsonfile.JsonWriter(out)
+    f.start_dict()
+
+    for item in objects.items():
+        f.dict_item(*item)
+
+    f.end_dict()
+
+    serialized = out.getvalue()
+    note(serialized)
+    remade = json.loads(serialized)
+    assert remade == objects
