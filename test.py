@@ -2,7 +2,7 @@ import io
 import json
 import math
 
-from hypothesis import strategies as st, given
+from hypothesis import strategies as st, given, note
 
 import jsonfile
 
@@ -53,4 +53,27 @@ def test_list_raw(objects):
     f.write_list_end()
 
     remade = json.loads(out.getvalue())
+    assert remade == objects
+
+
+@given(st.lists(json_objects))
+def test_nested_list(objects):
+    out = io.StringIO()
+    f = jsonfile.JsonWriter(out)
+    f.write_list_start()
+
+    for item in objects:
+        if isinstance(item, list):
+            f.write_list_start()
+            for item2 in item:
+                f.write_list_item(item2)
+            f.write_list_end()
+        else:
+            f.write_list_item(item)
+
+    f.write_list_end()
+
+    serialized = out.getvalue()
+    note(serialized)
+    remade = json.loads(serialized)
     assert remade == objects
