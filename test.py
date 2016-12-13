@@ -42,11 +42,15 @@ def test_write_nan():
 
 
 @given(st.lists(json_objects))
-def test_list(objects):
+def test_list_raw(objects):
     out = io.StringIO()
-    with jsonfile.JsonList(out) as lst:
-        for item in objects:
-            lst.write_item(item)
+    f = jsonfile.JsonWriter(out)
+    f.write_list_start()
+
+    for item in objects:
+        f.write_list_item(item)
+
+    f.write_list_end()
 
     remade = json.loads(out.getvalue())
     assert remade == objects

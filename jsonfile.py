@@ -16,27 +16,15 @@ class JsonWriter:
     def _write_obj(self, obj):
         json.dump(obj, self.out)
 
-
-class JsonList:
-    def __init__(self, out):
-        self.out = out
-        self.started = False
-        self.entered = False
-
-    def __enter__(self):
+    def write_list_start(self):
         self.out.write('[')
-        self.entered = True
-        return self
+        self.pending_comma = ''
 
-    def write_item(self, item):
-        assert self.entered
+    def write_list_item(self, item):
+        self.out.write(self.pending_comma)
+        self._write_obj(item)
+        self.pending_comma = ','
 
-        if self.started:
-            self.out.write(',')
-        self.started = True
-
-        json.dump(item, self.out)
-
-    def __exit__(self, etype, evalue, etraceback):
+    def write_list_end(self):
+        self.pending_comma = ''
         self.out.write(']')
-        self.entered = False
