@@ -1,5 +1,7 @@
 jsonfile - incrementally generate JSON
 
+``pip install jsonfile`` - `PyPI link <https://pypi.python.org/pypi/jsonfile>`_
+
 Incrementally means that, in most places, you can either send in a complete Python
 object, or build it a piece at a time.  For example, let's build the JSON structure
 ``[3, {"cool": true, "awesome": [1,2,3,4,5]}]``::
