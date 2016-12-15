@@ -45,6 +45,9 @@ will be slightly more convenient::
 Because the underlying ``JsonProto`` doesn't do IO, it should be easy to make a
 version of ``JsonWriter`` that works well in an async context.
 
+Many kinds of errors are caught: having more than one object at the root level
+of a file, using a list item in a dictionary, etc.
+
 TODO:
 
 - Allow specifying your own JSONEncoder to use on complete objects.
