@@ -2,6 +2,7 @@ import io
 import json
 import math
 
+import pytest
 from hypothesis import strategies as st, given, note
 
 import jsonfile
@@ -184,6 +185,20 @@ def test_recursive_writes(obj):
     remade = json.loads(serialized)
     assert remade == obj
 
+
+def test_two_top_level_items():
+    jp = jsonfile.JsonProto()
+    jp.start_list()
+    jp.end_list()
+    with pytest.raises(Exception):
+        jp.start_list()
+
+
+def test_list_item_in_dict():
+    jp = jsonfile.JsonProto()
+    jp.start_list()
+    with pytest.raises(Exception):
+        jp.dict_key('asdf')
 
 # TODO: how to test whether it's possible to make invalid JSON?
 # (it's currently possible, since you can make a list into a dict key)
