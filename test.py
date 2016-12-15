@@ -95,3 +95,21 @@ def test_dict_raw(objects):
     note(serialized)
     remade = json.loads(serialized)
     assert remade == objects
+
+
+@given(st.dictionaries(st.text(max_size=5), json_objects, max_size=5))
+def test_dict_piecemeal(objects):
+    out = io.StringIO()
+    f = jsonfile.JsonWriter(out)
+    f.start_dict()
+
+    for k, v in objects.items():
+        f.dict_key(k)
+        f.dict_value(v)
+
+    f.end_dict()
+
+    serialized = out.getvalue()
+    note(serialized)
+    remade = json.loads(serialized)
+    assert remade == objects
