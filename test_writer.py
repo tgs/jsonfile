@@ -25,33 +25,27 @@ json_objects = st.recursive(
 
 @given(json_objects)
 def test_write_obj(obj):
-    out = io.StringIO()
-    f = jsonfile.JsonWriter(out)
-    f.toplevel_item(obj)
-
-    remade = json.loads(out.getvalue())
+    jp = jsonfile.JsonProto()
+    remade = json.loads(jp.toplevel_item(obj))
     assert remade == obj
 
 
 def test_write_nan():
-    out = io.StringIO()
-    f = jsonfile.JsonWriter(out)
-    f.toplevel_item(float('nan'))
-
-    remade = json.loads(out.getvalue())
+    jp = jsonfile.JsonProto()
+    remade = json.loads(jp.toplevel_item(float('nan')))
     assert math.isnan(remade)
 
 
 @given(st.lists(json_objects, max_size=5))
 def test_list_raw(objects):
     out = io.StringIO()
-    f = jsonfile.JsonWriter(out)
-    f.start_list()
+    jp = jsonfile.JsonProto()
+    out.write(jp.start_list())
 
     for item in objects:
-        f.list_item(item)
+        out.write(jp.list_item(item))
 
-    f.end_list()
+    out.write(jp.end_list())
 
     remade = json.loads(out.getvalue())
     assert remade == objects
@@ -60,19 +54,19 @@ def test_list_raw(objects):
 @given(st.lists(json_objects, max_size=5))
 def test_nested_list(objects):
     out = io.StringIO()
-    f = jsonfile.JsonWriter(out)
-    f.start_list()
+    jw = jsonfile.JsonWriter(out)
+    jw.start_list()
 
     for item in objects:
         if isinstance(item, list):
-            f.start_list()
+            jw.start_list()
             for item2 in item:
-                f.list_item(item2)
-            f.end_list()
+                jw.list_item(item2)
+            jw.end_list()
         else:
-            f.list_item(item)
+            jw.list_item(item)
 
-    f.end_list()
+    jw.end_list()
 
     serialized = out.getvalue()
     note(serialized)
@@ -83,13 +77,13 @@ def test_nested_list(objects):
 @given(st.dictionaries(st.text(max_size=5), json_objects, max_size=5))
 def test_dict_raw(objects):
     out = io.StringIO()
-    f = jsonfile.JsonWriter(out)
-    f.start_dict()
+    jp = jsonfile.JsonProto()
+    out.write(jp.start_dict())
 
     for item in objects.items():
-        f.dict_item(*item)
+        out.write(jp.dict_item(*item))
 
-    f.end_dict()
+    out.write(jp.end_dict())
 
     serialized = out.getvalue()
     note(serialized)
@@ -100,14 +94,14 @@ def test_dict_raw(objects):
 @given(st.dictionaries(st.text(max_size=5), json_objects, max_size=5))
 def test_dict_piecemeal(objects):
     out = io.StringIO()
-    f = jsonfile.JsonWriter(out)
-    f.start_dict()
+    jp = jsonfile.JsonProto()
+    out.write(jp.start_dict())
 
     for k, v in objects.items():
-        f.dict_key(k)
-        f.dict_value(v)
+        out.write(jp.dict_key(k))
+        out.write(jp.dict_value(v))
 
-    f.end_dict()
+    out.write(jp.end_dict())
 
     serialized = out.getvalue()
     note(serialized)
@@ -117,13 +111,13 @@ def test_dict_piecemeal(objects):
 
 def test_finish_all():
     out = io.StringIO()
-    f = jsonfile.JsonWriter(out)
-    f.start_dict()
-    f.dict_key('things')
-    f.start_list()
-    f.list_item('toothbrushes')
-    f.list_item('microphones')
-    f.finish_all()
+    jw = jsonfile.JsonWriter(out)
+    jw.start_dict()
+    jw.dict_key('things')
+    jw.start_list()
+    jw.list_item('toothbrushes')
+    jw.list_item('microphones')
+    jw.finish_all()
 
     serialized = out.getvalue()
     print(serialized)
@@ -133,52 +127,57 @@ def test_finish_all():
     }
 
 
-def write_list_item(f, item):
-    f.list_item(item)
-
-
-def write_dict_key(f, item):
-    f.dict_key(item)
-
-
-def write_dict_value(f, item):
+def write_list_item(jw, item):
     if isinstance(item, list):
-        write_list(f, item)
+        write_list(jw, item)
     elif isinstance(item, dict):
-        write_dict(f, item)
+        write_dict(jw, item)
     else:
-        f.dict_value(item)
+        jw.list_item(item)
 
 
-def write_list(f, items):
-    f.start_list()
+def write_dict_key(jw, item):
+    jw.dict_key(item)
+
+
+def write_dict_value(jw, item):
+    if isinstance(item, list):
+        write_list(jw, item)
+    elif isinstance(item, dict):
+        write_dict(jw, item)
+    else:
+        jw.dict_value(item)
+
+
+def write_list(jw, items):
+    jw.start_list()
     for item in items:
-        write_list_item(f, item)
-    f.end_list()
+        write_list_item(jw, item)
+    jw.end_list()
 
 
-def write_dict(f, items):
-    f.start_dict()
+def write_dict(jw, items):
+    jw.start_dict()
     for k,v in items.items():
-        write_dict_key(f, k)
-        write_dict_value(f, v)
-    f.end_dict()
+        write_dict_key(jw, k)
+        write_dict_value(jw, v)
+    jw.end_dict()
 
 
-def write_toplevel(f, item):
+def write_toplevel(jw, item):
     if isinstance(item, list):
-        write_list(f, item)
+        write_list(jw, item)
     elif isinstance(item, dict):
-        write_dict(f, item)
+        write_dict(jw, item)
     else:
-        f.toplevel_item(item)
+        jw.toplevel_item(item)
 
 
 @given(json_objects)
 def test_recursive_writes(obj):
     out = io.StringIO()
-    f = jsonfile.JsonWriter(out)
-    write_toplevel(f, obj)
+    jw = jsonfile.JsonWriter(out)
+    write_toplevel(jw, obj)
 
     serialized = out.getvalue()
     note(serialized)
