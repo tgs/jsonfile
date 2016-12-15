@@ -96,3 +96,11 @@ class JsonWriter:
 
     def push_state(self, new_state):
         self.context.append(new_state)
+
+    @property
+    def done(self):
+        return len(self.context) == 1
+
+    def finish_all(self):
+        while not self.done:
+            self.end_container()

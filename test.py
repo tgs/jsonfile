@@ -113,3 +113,21 @@ def test_dict_piecemeal(objects):
     note(serialized)
     remade = json.loads(serialized)
     assert remade == objects
+
+
+def test_finish_all():
+    out = io.StringIO()
+    f = jsonfile.JsonWriter(out)
+    f.start_dict()
+    f.dict_key('things')
+    f.start_list()
+    f.list_item('toothbrushes')
+    f.list_item('microphones')
+    f.finish_all()
+
+    serialized = out.getvalue()
+    print(serialized)
+    remade = json.loads(serialized)
+    assert remade == {
+        'things': ['toothbrushes', 'microphones']
+    }
