@@ -187,3 +187,4 @@ def test_recursive_writes(obj):
 
 
 # TODO: how to test whether it's possible to make invalid JSON?
+# (it's currently possible, since you can make a list into a dict key)
