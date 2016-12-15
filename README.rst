@@ -52,3 +52,4 @@ TODO:
 - Implement an ``AsyncJsonWriter``
 - Better tests for preventing illegal JSON from being generated (e.g. lists as
   keys).
+- Python 2 support?
