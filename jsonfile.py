@@ -34,8 +34,16 @@ class State(enum.Enum):
 
 
 class JsonWriter:
+    """
+    Incrementally write a file in JSON format.
+    """
     def __init__(self, out):
         self.out = out
+        """
+        Create a JsonWriter that writes to the given file handle.
+
+        The file handle should be opened in text mode.
+        """
         self.context = [State.TopLevel]
 
     def _before_item(self):
@@ -51,6 +59,11 @@ class JsonWriter:
         self._start_container(State.ListStart)
 
     def toplevel_item(self, item):
+        """
+        If your file only contains one item, why are using this library?
+
+        But in any case, you can write one item using this.
+        """
         assert self.top_state == State.TopLevel
         self._before_item()
         json.dump(item, self.out)
@@ -60,13 +73,13 @@ class JsonWriter:
         self._before_item()
         json.dump(item, self.out)
 
-    def end_container(self):
+    def _end_container(self):
         last_state = self.context.pop()
         self.out.write(last_state.on_exit)
 
     def end_list(self):
         assert self.top_state in (State.List, State.ListStart)
-        self.end_container()
+        self._end_container()
 
     def start_dict(self):
         self._before_item()
@@ -90,7 +103,7 @@ class JsonWriter:
         json.dump(value, self.out)
 
     def end_dict(self):
-        self.end_container()
+        self._end_container()
 
     @property
     def top_state(self):
@@ -108,4 +121,4 @@ class JsonWriter:
 
     def finish_all(self):
         while not self.done:
-            self.end_container()
+            self._end_container()
