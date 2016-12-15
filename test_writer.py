@@ -27,7 +27,7 @@ json_objects = st.recursive(
 def test_write_obj(obj):
     out = io.StringIO()
     f = jsonfile.JsonWriter(out)
-    f.list_item(obj)
+    f.toplevel_item(obj)
 
     remade = json.loads(out.getvalue())
     assert remade == obj
@@ -36,7 +36,7 @@ def test_write_obj(obj):
 def test_write_nan():
     out = io.StringIO()
     f = jsonfile.JsonWriter(out)
-    f.list_item(float('nan'))
+    f.toplevel_item(float('nan'))
 
     remade = json.loads(out.getvalue())
     assert math.isnan(remade)
@@ -131,3 +131,59 @@ def test_finish_all():
     assert remade == {
         'things': ['toothbrushes', 'microphones']
     }
+
+
+def write_list_item(f, item):
+    f.list_item(item)
+
+
+def write_dict_key(f, item):
+    f.dict_key(item)
+
+
+def write_dict_value(f, item):
+    if isinstance(item, list):
+        write_list(f, item)
+    elif isinstance(item, dict):
+        write_dict(f, item)
+    else:
+        f.dict_value(item)
+
+
+def write_list(f, items):
+    f.start_list()
+    for item in items:
+        write_list_item(f, item)
+    f.end_list()
+
+
+def write_dict(f, items):
+    f.start_dict()
+    for k,v in items.items():
+        write_dict_key(f, k)
+        write_dict_value(f, v)
+    f.end_dict()
+
+
+def write_toplevel(f, item):
+    if isinstance(item, list):
+        write_list(f, item)
+    elif isinstance(item, dict):
+        write_dict(f, item)
+    else:
+        f.toplevel_item(item)
+
+
+@given(json_objects)
+def test_recursive_writes(obj):
+    out = io.StringIO()
+    f = jsonfile.JsonWriter(out)
+    write_toplevel(f, obj)
+
+    serialized = out.getvalue()
+    note(serialized)
+    remade = json.loads(serialized)
+    assert remade == obj
+
+
+# TODO: how to test whether it's possible to make invalid JSON?

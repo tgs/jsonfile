@@ -50,8 +50,13 @@ class JsonWriter:
         self._before_item()
         self._start_container(State.ListStart)
 
+    def toplevel_item(self, item):
+        assert self.top_state == State.TopLevel
+        self._before_item()
+        json.dump(item, self.out)
+
     def list_item(self, item):
-        assert self.top_state in (State.List, State.ListStart, State.TopLevel)
+        assert self.top_state in (State.List, State.ListStart)
         self._before_item()
         json.dump(item, self.out)
 
