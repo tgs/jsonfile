@@ -33,6 +33,40 @@ class State(enum.Enum):
     def state_on_item(self):
         return type(self)[self.state_on_item_str]
 
+# Add 'can_consume' or something, and put the pending comma on the stack, rather
+# than as a new type of state?
+# on_exit would become fancy, to say "pop another one after me"?
+#
+#
+# That sounds like a pain in the butt.
+
+
+
+# How could that state enum get generated automatically or be implicit in some code?
+#
+#
+# At the moment, this is only smart enough to deal with 'end_container' closing the *top*
+# of the stack.  If it weren't, then you could deal with the comma-separation and the start/end container separately?
+
+# push comma-separation onto stack and THEN start/end list?  start/end list doesn't handle normal items, passes them on.
+# comma-separation does handle them.  start/end list handles start/end list messages, pops TWO.
+#
+#
+
+
+# what if it yields formatters?
+def listof(what):
+    yield literal('[')
+    yield commaseparated(what)
+    yield literal(']')
+
+
+def commaseparated(what):
+    first = yield what | nothing
+    if first is not None:
+        yield (literal(',') + what).many()
+
+
 
 class JsonProto:
     """
